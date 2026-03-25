@@ -1,0 +1,16 @@
+export const INITIAL_BANKS = [
+  { id:"ba1", name:"Sigma D1 Logistics", account:"012345678901",
+    ifsc:"HDFC0001234", branch:"Andheri West, Mumbai",
+    balance:"₹12,40,000", type:"Current Account", isDefault:true, isVirtual:false },
+  { id:"ba2", name:"Sigma D1 Logistics", account:"500125678905",
+    ifsc:"ICIC0000024", branch:"Koramangala, Bangalore",
+    balance:"₹8,75,500", type:"Current Account", isDefault:false, isVirtual:false },
+  { id:"ba3", name:"Sigma D1 Logistics", account:"308765009120",
+    ifsc:"SBIN0001234", branch:"Connaught Place, New Delhi",
+    balance:"₹3,20,000", type:"Savings Account", isDefault:false, isVirtual:false },
+  { id:"va1", name:"Sigma D1 Logistics", account:"VA9823401567",
+    ifsc:"PEKO0001234", branch:"Business", balance:"₹5,00,000",
+    type:"Virtual Account", isDefault:false, isVirtual:true,
+    pan:"ABCDE1234F", email:"accounts@sigma.com", mobile:"9876543210",
+    address:"Andheri West, Mumbai", status:"Active", created:"2026-01-15" },
+];
