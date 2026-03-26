@@ -87,17 +87,38 @@ export default function DashboardPage({ dummyMode, onNavigate }) {
               </div>
 
               {/* Card 3 — Primary Bank Account */}
-              <div style={{ flex: "1 1 180px", background: "#F5F0FF", borderRadius: 14, padding: "20px 22px", border: "1px solid #EBEBEB" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                  <span style={{ fontSize: 18 }}>🏦</span>
-                  <div style={{ fontSize: 13, color: "#8A8A8A" }}>Primary Bank Account</div>
+              <div style={{
+                flex: "1 1 180px",
+                background: "#F5F0FF",
+                borderRadius: 14,
+                padding: "20px 22px",
+                border: "1px solid #EBEBEB",
+              }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
+                  <span style={{ fontSize:18 }}>🏦</span>
+                  <div style={{ fontSize:13, color:"#8A8A8A" }}>Primary Bank Account</div>
                 </div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: "#1A1A1A", marginBottom: 4 }}>
-                  {dummyMode ? "₹12,40,000" : "₹0"}
-                </div>
-                <div style={{ fontSize: 13, color: "#8A8A8A" }}>
-                  {dummyMode ? "HDFC – XXXX1234" : "No account linked"}
-                </div>
+
+                {dummyMode ? (
+                  <>
+                    <div style={{ fontSize:20, fontWeight:700, color:"#1A1A1A", marginBottom:4 }}>
+                      HDFC Bank
+                    </div>
+                    <div style={{ fontSize:15, fontWeight:600, color:"#1A1A1A", marginBottom:4 }}>
+                      ••••••••1234
+                    </div>
+                    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <span style={{ fontSize:13, color:"#8A8A8A" }}>Current Account</span>
+                      <span style={{
+                        fontSize:11, fontWeight:700,
+                        padding:"1px 7px", borderRadius:20,
+                        background:"#E8F5E9", color:"#276749",
+                      }}>Default</span>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ fontSize:15, color:"#8A8A8A" }}>No account linked</div>
+                )}
               </div>
 
             </div>

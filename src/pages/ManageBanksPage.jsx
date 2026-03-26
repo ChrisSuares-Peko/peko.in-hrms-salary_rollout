@@ -353,13 +353,10 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
               display:"flex", flexDirection:"column", flexShrink:0,
               boxShadow:"-4px 0 24px rgba(0,0,0,0.08)",
             }}>
-              <div style={{ padding:"20px 24px", borderBottom:"1px solid #EBEBEB", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <div style={{ width:36, height:36, borderRadius:10, background:"#FCE4EC", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>🏦</div>
-                  <div>
-                    <div style={{ fontWeight:700, fontSize:16, color:"#1A1A1A" }}>Add Bank Account</div>
-                    <div style={{ fontSize:12, color:"#8A8A8A" }}>Link your company's bank account</div>
-                  </div>
+              <div style={{ padding:"18px 24px", borderBottom:"1px solid #EBEBEB", display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+                <div>
+                  <div style={{ fontWeight:700, fontSize:18, color:"#1A1A1A" }}>Add Bank Account</div>
+                  <div style={{ fontSize:13, color:"#8A8A8A", marginTop:2 }}>Link your company's bank account</div>
                 </div>
                 <button
                   onClick={() => { setShowAdd(false); setAddForm({ name:"", account:"", ifsc:"", branch:"" }); setAddVerified(false); }}
@@ -367,25 +364,24 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                 >✕</button>
               </div>
 
-              <div style={{ flex:1, overflowY:"auto", padding:"24px", display:"flex", flexDirection:"column", gap:18 }}>
+              <div style={{ flex:1, overflowY:"auto", padding:"24px", display:"flex", flexDirection:"column", gap:16 }}>
                 {[
                   ["Account Name",        "name",    "e.g. Sigma D1 Logistics",   true],
-                  ["Bank Account Number", "account", "Enter your account number",  true],
+                  ["Bank Account Number", "account", "Enter account number",       true],
                   ["IFSC Code",           "ifsc",    "e.g. HDFC0001234",           true],
-                  ["Branch",              "branch",  "Enter branch location",      false],
+                  ["Branch",              "branch",  "Enter branch (optional)",    false],
                 ].map(([lbl, key, ph, required]) => (
                   <div key={key}>
                     <label style={{ fontSize:13, color:"#8A8A8A", marginBottom:6, display:"block", fontWeight:500 }}>
                       {required && <span style={{ color:"#E83838" }}>* </span>}{lbl}
-                      {!required && <span style={{ fontWeight:400, color:"#8A8A8A" }}> (Optional)</span>}
                     </label>
                     <input
                       placeholder={ph}
                       value={addForm[key]}
                       onChange={e => { setAddForm(f => ({ ...f, [key]: e.target.value })); setAddVerified(false); }}
                       style={{
-                        width:"100%", border:"1px solid #EBEBEB", borderRadius:10,
-                        padding:"10px 14px", fontSize:15, outline:"none",
+                        width:"100%", border:"1px solid #EBEBEB", borderRadius:8,
+                        padding:"10px 12px", fontSize:15, outline:"none",
                         boxSizing:"border-box", background:"#FFFFFF", color:"#1A1A1A",
                       }}
                       onFocus={e => e.target.style.borderColor = "#E83838"}
@@ -399,12 +395,12 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                     onClick={() => setShowAddPopup(true)}
                     disabled={!addForm.name || !addForm.account || !addForm.ifsc}
                     style={{
-                      border:"1.5px solid #E83838", borderRadius:10,
+                      border:"1.5px solid #E83838", borderRadius:8,
                       background:"#FFFFFF", color:"#E83838",
                       fontWeight:600,
                       cursor: (!addForm.name || !addForm.account || !addForm.ifsc) ? "not-allowed" : "pointer",
                       padding:"10px", fontSize:15,
-                      display:"flex", alignItems:"center", justifyContent:"center", gap:7,
+                      display:"flex", alignItems:"center", justifyContent:"center", gap:6,
                       opacity: (!addForm.name || !addForm.account || !addForm.ifsc) ? 0.5 : 1,
                       boxSizing:"border-box", width:"100%",
                     }}
@@ -412,7 +408,7 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                 )}
 
                 {addVerified && (
-                  <div style={{ padding:"12px 16px", background:"#F0FFF4", border:"1px solid #B7EBC3", borderRadius:10, color:"#276749", display:"flex", alignItems:"center", gap:8, fontSize:14 }}>
+                  <div style={{ padding:"12px 14px", background:"#F0FFF4", border:"1px solid #B7EBC3", borderRadius:8, color:"#276749", display:"flex", alignItems:"center", gap:8, fontSize:14 }}>
                     ✅ Account verified — you're good to go!
                   </div>
                 )}
@@ -421,7 +417,7 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
               <div style={{ padding:"16px 24px", borderTop:"1px solid #EBEBEB", display:"flex", gap:10 }}>
                 <button
                   onClick={() => { setShowAdd(false); setAddForm({ name:"", account:"", ifsc:"", branch:"" }); setAddVerified(false); }}
-                  style={{ flex:1, border:"1.5px solid #EBEBEB", borderRadius:10, background:"#FFFFFF", color:"#1A1A1A", fontWeight:500, cursor:"pointer", padding:"10px", fontSize:15 }}
+                  style={{ flex:1, border:"1px solid #EBEBEB", borderRadius:8, background:"#FFFFFF", color:"#1A1A1A", fontWeight:500, cursor:"pointer", padding:"11px", fontSize:15 }}
                 >Cancel</button>
                 <button
                   onClick={() => {
@@ -436,13 +432,13 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                   }}
                   disabled={!addVerified}
                   style={{
-                    flex:1, border:"none", borderRadius:10,
+                    flex:1, border:"none", borderRadius:8,
                     background: addVerified
                       ? "linear-gradient(135deg,#FF6B6B 0%,#E03030 60%,#C62828 100%)"
                       : "#E8E8E8",
                     color: addVerified ? "#fff" : "#8A8A8A",
                     fontWeight:600, cursor: addVerified ? "pointer" : "not-allowed",
-                    padding:"10px", fontSize:15,
+                    padding:"11px", fontSize:15,
                   }}
                 >Add Account</button>
               </div>

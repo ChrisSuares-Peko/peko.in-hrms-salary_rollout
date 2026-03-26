@@ -24,6 +24,7 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
   );
   const [editEmp, setEditEmp] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [selected, setSelected] = useState([]);
   const [showVerifyPopup, setShowVerifyPopup] = useState(false);
   const [showBeneficiaryPopup, setShowBeneficiaryPopup] = useState(false);
   const [breakupEmp, setBreakupEmp] = useState(null);
@@ -46,6 +47,12 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
       e.id === editEmp.id ? { ...e, ...editForm } : e
     ));
     setEditEmp(null);
+  };
+
+  const toggleSelect = (id) => {
+    setSelected(s =>
+      s.includes(id) ? s.filter(x => x !== id) : [...s, id]
+    );
   };
 
   const updateRemark = (id, val) => {
@@ -76,6 +83,11 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
               <h1 style={{ fontSize: FS.xl, fontWeight: 700 }}>Employees</h1>
               <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  style={{ ...btnSecondary, padding: "8px 16px", fontSize: FS.sm }}
+                >
+                  ⬇ Export{selected.length > 0 ? ` (${selected.length})` : ""}
+                </button>
                 <button onClick={() => setShowVerifyPopup(true)}
                   style={{ ...btnSecondary, padding: "8px 16px", fontSize: FS.sm }}>
                   Verify Accounts
@@ -122,7 +134,26 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
                       <tr>
-                        {["","Employee","ID","Joining","Salary","Bank Account","Status","Beneficiary","Remark",""].map((h, i) => (
+                        <th style={{
+                          padding: "12px 14px",
+                          borderBottom: "1px solid #EBEBEB",
+                          background: C.bg,
+                          width: 40,
+                        }}>
+                          <input
+                            type="checkbox"
+                            checked={filtered.length > 0 && selected.length === filtered.length}
+                            onChange={() => {
+                              if (selected.length === filtered.length) {
+                                setSelected([]);
+                              } else {
+                                setSelected(filtered.map(e => e.id));
+                              }
+                            }}
+                            style={{ width: 15, height: 15, accentColor: "#E83838", cursor: "pointer" }}
+                          />
+                        </th>
+                        {["Employee","ID","Joining","Salary","Bank Account","Status","Beneficiary","Remark",""].map((h, i) => (
                           <th key={i} style={{ ...thStyle, textAlign: "left" }}>{h}</th>
                         ))}
                       </tr>
@@ -130,8 +161,13 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                     <tbody>
                       {filtered.map((emp, i) => (
                         <tr key={emp.id}>
-                          <td style={tdStyle(i)}>
-                            <input type="checkbox" />
+                          <td style={{ padding: "12px 14px", borderBottom: `1px solid ${C.border}`, background: i % 2 === 0 ? C.white : C.bg }}>
+                            <input
+                              type="checkbox"
+                              checked={selected.includes(emp.id)}
+                              onChange={() => toggleSelect(emp.id)}
+                              style={{ width: 15, height: 15, accentColor: "#E83838", cursor: "pointer" }}
+                            />
                           </td>
                           <td style={tdStyle(i)}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -196,7 +232,7 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
                       <tr>
-                        {["Employee","ID","Joining","Offboarding","Salary","Remark","Breakup"].map((h, i) => (
+                        {["Employee","ID","Joining","Offboarding","Net Salary","Remark","Breakup"].map((h, i) => (
                           <th key={i} style={{ ...thStyle, textAlign: "left" }}>{h}</th>
                         ))}
                       </tr>
@@ -221,7 +257,10 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                           <td style={tdStyle(i)}>{emp.id}</td>
                           <td style={tdStyle(i)}>{emp.joining}</td>
                           <td style={tdStyle(i)}>{emp.offboarding}</td>
-                          <td style={tdStyle(i)}><strong>{emp.salary}</strong></td>
+                          <td style={tdStyle(i)}>
+                            <div style={{ fontWeight:600, color:"#1A1A1A" }}>{emp.salary}</div>
+                            <div style={{ fontSize:11, color:"#8A8A8A", marginTop:2 }}>Net</div>
+                          </td>
                           <td style={tdStyle(i)}>{emp.remark}</td>
                           <td style={tdStyle(i)}>
                             <button
@@ -248,48 +287,37 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
               display: "flex",
               flexDirection: "column",
               flexShrink: 0,
-              boxShadow: "-4px 0 24px rgba(0,0,0,0.07)",
+              boxShadow: "-4px 0 24px rgba(0,0,0,0.08)",
               zIndex: 10,
             }}>
 
               {/* Header */}
               <div style={{
-                padding: "20px 24px",
+                padding: "18px 24px",
                 borderBottom: "1px solid #EBEBEB",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "flex-start",
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{
-                    width: 44, height: 44, borderRadius: "50%",
-                    background: "#FFF0F0", color: "#E83838",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 700, fontSize: 18, flexShrink: 0,
-                  }}>
-                    {editEmp.initials}
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 18, color: "#1A1A1A" }}>
+                    Update Employee
                   </div>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 16, color: "#1A1A1A" }}>
-                      Update Employee
-                    </div>
-                    <div style={{ fontSize: 12, color: "#8A8A8A", marginTop: 2 }}>
-                      {editEmp.id} · {editEmp.email}
-                    </div>
+                  <div style={{ fontSize: 13, color: "#8A8A8A", marginTop: 2 }}>
+                    {editEmp.id} · {editEmp.email}
                   </div>
                 </div>
                 <button
                   onClick={() => setEditEmp(null)}
                   style={{
                     background: "none", border: "none",
-                    fontSize: 20, cursor: "pointer", color: "#8A8A8A",
-                    lineHeight: 1, padding: 4,
+                    fontSize: 20, cursor: "pointer", color: "#8A8A8A", lineHeight: 1,
                   }}
                 >✕</button>
               </div>
 
               {/* Form body */}
-              <div style={{ padding: "24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 18 }}>
+              <div style={{ padding: "24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
 
                 {/* Employee Name — read only */}
                 <div>
@@ -297,23 +325,19 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                     Employee Name
                   </label>
                   <div style={{
-                    background: "#F7F7F7",
                     border: "1px solid #EBEBEB",
-                    borderRadius: 10,
-                    padding: "10px 14px",
+                    borderRadius: 8,
+                    padding: "10px 12px",
                     fontSize: 15,
                     color: "#8A8A8A",
-                    userSelect: "none",
+                    background: "#FFFFFF",
                   }}>
                     {editForm.name}
                   </div>
                   <div style={{ fontSize: 11, color: "#8A8A8A", marginTop: 4 }}>
-                    Name cannot be edited here. Contact HR to update.
+                    Name cannot be edited here.
                   </div>
                 </div>
-
-                {/* Divider */}
-                <div style={{ height: 1, background: "#F3F4F6" }} />
 
                 {/* Bank Account */}
                 <div>
@@ -323,18 +347,16 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                   <input
                     value={editForm.bank || ""}
                     onChange={e => setEditForm(f => ({ ...f, bank: e.target.value }))}
-                    placeholder="e.g. HDFC – XXXX1234"
                     style={{
                       width: "100%",
                       border: `1px solid ${editForm.bank !== editForm.originalBank ? "#E83838" : "#EBEBEB"}`,
-                      borderRadius: 10,
-                      padding: "10px 14px",
+                      borderRadius: 8,
+                      padding: "10px 12px",
                       fontSize: 15,
                       outline: "none",
                       boxSizing: "border-box",
                       background: editForm.bank !== editForm.originalBank ? "#FFF8F8" : "#FFFFFF",
                       color: "#1A1A1A",
-                      transition: "border-color 0.15s",
                     }}
                   />
                   {editForm.bank !== editForm.originalBank && (
@@ -342,7 +364,7 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                       marginTop: 8,
                       width: "100%",
                       border: "1.5px solid #E83838",
-                      borderRadius: 10,
+                      borderRadius: 8,
                       background: "#FFFFFF",
                       color: "#E83838",
                       fontWeight: 600,
@@ -368,12 +390,11 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                   <input
                     value={editForm.ifsc || ""}
                     onChange={e => setEditForm(f => ({ ...f, ifsc: e.target.value }))}
-                    placeholder="e.g. HDFC0001234"
                     style={{
                       width: "100%",
                       border: "1px solid #EBEBEB",
-                      borderRadius: 10,
-                      padding: "10px 14px",
+                      borderRadius: 8,
+                      padding: "10px 12px",
                       fontSize: 15,
                       outline: "none",
                       boxSizing: "border-box",
@@ -393,12 +414,12 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                   <input
                     value={editForm.remark || ""}
                     onChange={e => setEditForm(f => ({ ...f, remark: e.target.value }))}
-                    placeholder="Add a note or remark..."
+                    placeholder="Add a note..."
                     style={{
                       width: "100%",
                       border: "1px solid #EBEBEB",
-                      borderRadius: 10,
-                      padding: "10px 14px",
+                      borderRadius: 8,
+                      padding: "10px 12px",
                       fontSize: 15,
                       outline: "none",
                       boxSizing: "border-box",
@@ -410,12 +431,9 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                   />
                 </div>
 
-                {/* Divider */}
-                <div style={{ height: 1, background: "#F3F4F6" }} />
-
                 {/* Beneficiary Status */}
                 <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 10, display: "block", fontWeight: 500 }}>
+                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 8, display: "block", fontWeight: 500 }}>
                     Beneficiary Status
                   </label>
                   <div style={{ display: "flex", gap: 8 }}>
@@ -429,9 +447,9 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                         onClick={() => setEditForm(f => ({ ...f, beneficiaryStatus: val }))}
                         style={{
                           flex: 1,
-                          padding: "9px 0",
+                          padding: "8px 0",
                           border: `1.5px solid ${editForm.beneficiaryStatus === val ? border : "#EBEBEB"}`,
-                          borderRadius: 10,
+                          borderRadius: 8,
                           textAlign: "center",
                           cursor: "pointer",
                           fontSize: 13,
@@ -439,7 +457,6 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                           background: editForm.beneficiaryStatus === val ? bg : "#FFFFFF",
                           color: editForm.beneficiaryStatus === val ? color : "#8A8A8A",
                           transition: "all 0.15s",
-                          userSelect: "none",
                         }}
                       >
                         {val}
@@ -461,8 +478,8 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                   onClick={() => setEditEmp(null)}
                   style={{
                     flex: 1,
-                    border: "1.5px solid #EBEBEB",
-                    borderRadius: 10,
+                    border: "1px solid #EBEBEB",
+                    borderRadius: 8,
                     background: "#FFFFFF",
                     color: "#1A1A1A",
                     fontWeight: 500,
@@ -470,15 +487,13 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                     padding: "11px",
                     fontSize: 15,
                   }}
-                >
-                  Cancel
-                </button>
+                >Cancel</button>
                 <button
                   onClick={saveEdit}
                   style={{
                     flex: 1,
                     border: "none",
-                    borderRadius: 10,
+                    borderRadius: 8,
                     background: "linear-gradient(135deg,#FF6B6B 0%,#E03030 60%,#C62828 100%)",
                     color: "#fff",
                     fontWeight: 600,
@@ -487,9 +502,7 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                     fontSize: 15,
                     boxShadow: "0 2px 8px rgba(200,40,40,0.25)",
                   }}
-                >
-                  Save Changes
-                </button>
+                >Save Changes</button>
               </div>
 
             </div>

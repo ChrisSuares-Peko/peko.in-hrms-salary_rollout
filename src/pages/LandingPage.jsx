@@ -2,7 +2,6 @@ import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { C, FS } from "../tokens";
-import { PAYROLL_COSTS, MONTHS_SHORT } from "../data/salary";
 
 const QUICK_MENU = [
   { emoji:"👥", label:"Employees &\nDepartments",    page:"employees" },
@@ -15,55 +14,20 @@ const QUICK_MENU = [
   { emoji:"⬇️", label:"Download Payslip\n& Record",  page:"history"   },
 ];
 
-function BarChart({ year, costs }) {
-  const data = costs[year] || [];
-  const max = Math.max(...data, 1);
-  const yLabels = [0, 20000, 40000, 60000, 80000];
-
-  return (
-    <div style={{ position: "relative", paddingLeft: 52, paddingBottom: 28, paddingTop: 12 }}>
-      {yLabels.map(v => (
-        <div key={v} style={{
-          position: "absolute", left: 0, fontSize: 11, color: "#8A8A8A",
-          bottom: 28 + (v / max) * 160 - 7, width: 48, textAlign: "right",
-        }}>
-          {v === 0 ? "0" : `${v / 1000}k`}
-        </div>
-      ))}
-      {yLabels.map(v => (
-        <div key={v} style={{
-          position: "absolute", left: 52, right: 0,
-          bottom: 28 + (v / max) * 160,
-          borderTop: "1px dashed #E5E7EB", pointerEvents: "none",
-        }} />
-      ))}
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 160 }}>
-        {data.map((val, i) => (
-          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{
-              width: "80%",
-              height: val > 0 ? (val / max) * 160 : 2,
-              background: val > 0
-                ? "linear-gradient(135deg,#FF6B6B 0%,#E03030 60%,#C62828 100%)"
-                : "#EBEBEB",
-              borderRadius: "4px 4px 0 0",
-              transition: "height 0.3s ease",
-              minHeight: val > 0 ? 4 : 2,
-            }} />
-          </div>
-        ))}
-      </div>
-      <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-        {MONTHS_SHORT.map((m, i) => (
-          <div key={i} style={{ flex: 1, textAlign: "center", fontSize: 11, color: "#8A8A8A" }}>{m}</div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function LandingPage({ dummyMode, onNavigate }) {
   const [costYear, setCostYear] = useState(2026);
+
+  const PAYROLL_COSTS_DATA = {
+    2026: [75207, 75207, 80000, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    2025: [68000, 68000, 69500, 69500, 71000, 71000,
+           72000, 72000, 73000, 73500, 74000, 75000],
+    2024: [62000, 62000, 63500, 63500, 65000, 65000,
+           66000, 66000, 67000, 67500, 68000, 68000],
+  };
+  const costs = dummyMode
+    ? (PAYROLL_COSTS_DATA[costYear] || [])
+    : Array(12).fill(0);
 
   return (
     <div style={{ display: "flex", height: "100vh", fontFamily: "Inter,sans-serif", background: "#F7F7F7" }}>
@@ -184,33 +148,142 @@ export default function LandingPage({ dummyMode, onNavigate }) {
               </div>
             )}
 
-            {/* Payroll Costs Chart */}
+            {/* Payroll Costs by Month */}
             <div style={{
-              background: "#FFFFFF", border: "1px solid #EBEBEB",
-              borderRadius: 14, padding: "20px 22px",
+              background: "#FFFFFF",
+              border: "1px solid #EBEBEB",
+              borderRadius: 14,
+              padding: "22px 24px",
             }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                <div style={{ fontWeight: 600, fontSize: 15, color: "#1A1A1A" }}>Payroll Costs by Month</div>
+
+              {/* Chart header */}
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 20,
+              }}>
+                <div style={{ fontWeight: 700, fontSize: 18, color: "#1A1A1A" }}>
+                  Payroll Costs by Month
+                </div>
                 <select
                   value={costYear}
                   onChange={e => setCostYear(Number(e.target.value))}
                   style={{
-                    border: "1px solid #EBEBEB", borderRadius: 8,
-                    padding: "6px 12px", fontSize: 15,
-                    background: "#FFFFFF", cursor: "pointer", outline: "none",
+                    border: "1px solid #EBEBEB",
+                    borderRadius: 8,
+                    padding: "6px 12px",
+                    fontSize: 15,
+                    background: "#FFFFFF",
+                    cursor: "pointer",
                   }}
                 >
-                  {[2026, 2025, 2024].map(y => <option key={y} value={y}>{y}</option>)}
+                  {[2026, 2025, 2024].map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
                 </select>
               </div>
-              {dummyMode
-                ? <BarChart year={costYear} costs={PAYROLL_COSTS} />
-                : (
-                  <div style={{ textAlign: "center", padding: "40px 0", color: "#8A8A8A", fontSize: 13 }}>
-                    📭 No data yet
+
+              {/* Chart body */}
+              <div style={{ display: "flex", gap: 8 }}>
+
+                {/* Y-axis labels — evenly spaced top to bottom */}
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  paddingBottom: 24,
+                  width: 44,
+                  flexShrink: 0,
+                  textAlign: "right",
+                }}>
+                  {[400000, 300000, 200000, 100000, 0].map(t => (
+                    <div key={t} style={{ fontSize: 11, color: "#8A8A8A", lineHeight: 1 }}>
+                      {t === 0 ? "0" : `${t / 1000}k`}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bars + grid lines + x-axis */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+
+                  {/* Chart area with grid lines and bars */}
+                  <div style={{ position: "relative", height: 160 }}>
+
+                    {/* Horizontal dashed grid lines */}
+                    {[0, 25, 50, 75, 100].map(pct => (
+                      <div
+                        key={pct}
+                        style={{
+                          position: "absolute",
+                          left: 0, right: 0,
+                          bottom: `${pct}%`,
+                          borderTop: pct === 0
+                            ? "1px solid #D1D5DB"
+                            : "1px dashed #E5E7EB",
+                          zIndex: 0,
+                        }}
+                      />
+                    ))}
+
+                    {/* Bars */}
+                    <div style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      alignItems: "flex-end",
+                      gap: 4,
+                      paddingBottom: 1,
+                      zIndex: 1,
+                    }}>
+                      {costs.map((val, i) => {
+                        const maxVal = 400000;
+                        const heightPct = val > 0
+                          ? Math.max(3, (val / maxVal) * 100)
+                          : 0;
+                        return (
+                          <div
+                            key={i}
+                            style={{
+                              flex: 1,
+                              display: "flex",
+                              alignItems: "flex-end",
+                              height: "100%",
+                            }}
+                          >
+                            <div style={{
+                              width: "100%",
+                              height: val > 0 ? `${heightPct}%` : "2px",
+                              background: val > 0
+                                ? "linear-gradient(180deg,#FF6B6B 0%,#E03030 100%)"
+                                : "#F3F4F6",
+                              borderRadius: "3px 3px 0 0",
+                              transition: "height 0.3s ease",
+                              opacity: val > 0 ? 1 : 0.3,
+                            }} />
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                )
-              }
+
+                  {/* X-axis month labels */}
+                  <div style={{ display: "flex", gap: 4, marginTop: 6 }}>
+                    {["Jan","Feb","Mar","Apr","May","Jun",
+                      "Jul","Aug","Sep","Oct","Nov","Dec"].map(m => (
+                      <div key={m} style={{
+                        flex: 1,
+                        fontSize: 11,
+                        color: "#8A8A8A",
+                        textAlign: "center",
+                      }}>
+                        {m}
+                      </div>
+                    ))}
+                  </div>
+
+                </div>
+              </div>
             </div>
 
             {/* Footer */}

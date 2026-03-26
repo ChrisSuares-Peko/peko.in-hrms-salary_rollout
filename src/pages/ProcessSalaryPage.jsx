@@ -334,32 +334,32 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
           {/* ── Edit Salary Side Panel ── */}
           {editRow && (
             <div style={{
-              width: 320, background: "#FFFFFF",
+              width: 300, background: "#FFFFFF",
               borderLeft: "1px solid #EBEBEB",
               display: "flex", flexDirection: "column", flexShrink: 0,
-              boxShadow: "-4px 0 24px rgba(0,0,0,0.07)",
+              boxShadow: "-4px 0 24px rgba(0,0,0,0.08)",
             }}>
 
               {/* Header */}
               <div style={{
-                padding: "20px 22px",
+                padding: "18px 24px",
                 borderBottom: "1px solid #EBEBEB",
                 display: "flex", justifyContent: "space-between", alignItems: "flex-start",
               }}>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 16, color: "#1A1A1A" }}>Edit Salary</div>
-                  <div style={{ fontSize: 12, color: "#8A8A8A", marginTop: 2 }}>
+                  <div style={{ fontWeight: 700, fontSize: 18, color: "#1A1A1A" }}>Edit Salary</div>
+                  <div style={{ fontSize: 13, color: "#8A8A8A", marginTop: 2 }}>
                     {editRow.name} · {editRow.id}
                   </div>
                 </div>
                 <button
                   onClick={() => setEditRow(null)}
-                  style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#8A8A8A" }}
+                  style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#8A8A8A", lineHeight: 1 }}
                 >✕</button>
               </div>
 
               {/* Fields */}
-              <div style={{ padding: "22px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ padding: "24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
 
                 {/* Employee — read only */}
                 <div>
@@ -367,9 +367,9 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
                     Employee
                   </label>
                   <div style={{
-                    background: "#F7F7F7", border: "1px solid #EBEBEB",
-                    borderRadius: 10, padding: "10px 14px",
-                    fontSize: 15, color: "#8A8A8A",
+                    border: "1px solid #EBEBEB", borderRadius: 8,
+                    padding: "10px 12px", fontSize: 15,
+                    color: "#8A8A8A", background: "#FFFFFF",
                   }}>{editForm.name}</div>
                 </div>
 
@@ -379,9 +379,9 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
                     Employee ID
                   </label>
                   <div style={{
-                    background: "#F7F7F7", border: "1px solid #EBEBEB",
-                    borderRadius: 10, padding: "10px 14px",
-                    fontSize: 15, color: "#8A8A8A",
+                    border: "1px solid #EBEBEB", borderRadius: 8,
+                    padding: "10px 12px", fontSize: 15,
+                    color: "#8A8A8A", background: "#FFFFFF",
                   }}>{editForm.id}</div>
                 </div>
 
@@ -395,8 +395,8 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
                     value={editForm.grossSalary || ""}
                     onChange={e => setEditForm(f => ({ ...f, grossSalary: e.target.value }))}
                     style={{
-                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 10,
-                      padding: "10px 14px", fontSize: 15, outline: "none",
+                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
+                      padding: "10px 12px", fontSize: 15, outline: "none",
                       boxSizing: "border-box", background: "#FFFFFF", color: "#1A1A1A",
                     }}
                     onFocus={e => e.target.style.borderColor = "#E83838"}
@@ -414,8 +414,8 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
                     value={editForm.deductions || ""}
                     onChange={e => setEditForm(f => ({ ...f, deductions: e.target.value }))}
                     style={{
-                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 10,
-                      padding: "10px 14px", fontSize: 15, outline: "none",
+                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
+                      padding: "10px 12px", fontSize: 15, outline: "none",
                       boxSizing: "border-box", background: "#FFFFFF", color: "#1A1A1A",
                     }}
                     onFocus={e => e.target.style.borderColor = "#E83838"}
@@ -433,8 +433,8 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
                     value={editForm.bonus || ""}
                     onChange={e => setEditForm(f => ({ ...f, bonus: e.target.value }))}
                     style={{
-                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 10,
-                      padding: "10px 14px", fontSize: 15, outline: "none",
+                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
+                      padding: "10px 12px", fontSize: 15, outline: "none",
                       boxSizing: "border-box", background: "#FFFFFF", color: "#1A1A1A",
                     }}
                     onFocus={e => e.target.style.borderColor = "#E83838"}
@@ -449,7 +449,7 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
                   borderRadius: 10,
                   padding: "14px 16px",
                 }}>
-                  <div style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 4 }}>
+                  <div style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6 }}>
                     Net Salary (Auto-calculated)
                   </div>
                   <div style={{ fontSize: 24, fontWeight: 700, color: "#E83838" }}>
@@ -461,26 +461,26 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
 
               {/* Footer */}
               <div style={{
-                padding: "14px 22px",
+                padding: "16px 24px",
                 borderTop: "1px solid #EBEBEB",
                 display: "flex", gap: 10,
               }}>
                 <button
                   onClick={() => setEditRow(null)}
                   style={{
-                    flex: 1, border: "1.5px solid #EBEBEB", borderRadius: 10,
+                    flex: 1, border: "1px solid #EBEBEB", borderRadius: 8,
                     background: "#FFFFFF", color: "#1A1A1A",
                     fontWeight: 500, cursor: "pointer",
-                    padding: "10px", fontSize: 15,
+                    padding: "11px", fontSize: 15,
                   }}
                 >Cancel</button>
                 <button
                   onClick={saveEdit}
                   style={{
-                    flex: 1, border: "none", borderRadius: 10,
+                    flex: 1, border: "none", borderRadius: 8,
                     background: "linear-gradient(135deg,#FF6B6B 0%,#E03030 60%,#C62828 100%)",
                     color: "#fff", fontWeight: 600, cursor: "pointer",
-                    padding: "10px", fontSize: 15,
+                    padding: "11px", fontSize: 15,
                     boxShadow: "0 2px 8px rgba(200,40,40,0.25)",
                   }}
                 >Save Changes</button>
