@@ -25,9 +25,10 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
 
   // Funds modal
   const [showFundsModal, setShowFundsModal] = useState(false);
-  const [fundsType, setFundsType] = useState("add");
-  const [fundsAmount, setFundsAmount] = useState("");
-  const [fundsProgress, setFundsProgress] = useState(false);
+  const [showDeleteGuard, setShowDeleteGuard] = useState(false);
+  const [fundsForm, setFundsForm] = useState({ action:"Credit", amount:"", purpose:"", transferType:"", bankRefNumber:"" });
+  const [fundsProcessing, setFundsProcessing] = useState(false);
+  const [fundsProgress, setFundsProgress] = useState(0);
   const [fundsSuccess, setFundsSuccess] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -36,6 +37,37 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
   const handleRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 1200);
+  };
+
+  const closeFundsModal = () => {
+    setShowFundsModal(false);
+    setFundsForm({ action:"Credit", amount:"", purpose:"", transferType:"", bankRefNumber:"" });
+    setFundsProcessing(false);
+    setFundsSuccess(false);
+    setFundsProgress(0);
+  };
+
+  const startFunds = () => {
+    setFundsProcessing(true); setFundsProgress(0);
+    const start = Date.now();
+    const tick = setInterval(() => {
+      const pct = Math.min(100, Math.round(((Date.now()-start)/2000)*100));
+      setFundsProgress(pct);
+      if (pct >= 100) {
+        clearInterval(tick);
+        setTimeout(() => {
+          setFundsProcessing(false);
+          setFundsSuccess(true);
+          const amt = parseInt(fundsForm.amount || 0);
+          setBanks(bs => bs.map(b => {
+            if (b.id !== selected) return b;
+            const cur = parseInt(b.balance.replace(/[₹,]/g, ""));
+            const next = fundsForm.action === "Credit" ? cur + amt : Math.max(0, cur - amt);
+            return { ...b, balance: `₹${next.toLocaleString("en-IN")}` };
+          }));
+        }, 300);
+      }
+    }, 30);
   };
 
   return (
@@ -270,7 +302,7 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                       style={{ border:"1.5px solid #EBEBEB", borderRadius:10, background:"#FFFFFF", color:"#1A1A1A", fontWeight:500, cursor:"pointer", padding:"7px 16px", fontSize:14 }}
                     >✏️ Update</button>
                     <button
-                      onClick={() => { setFundsAmount(""); setFundsSuccess(false); setShowFundsModal(true); }}
+                      onClick={() => { setFundsSuccess(false); setShowFundsModal(true); }}
                       style={{ border:"none", borderRadius:10, background:"linear-gradient(135deg,#9B59B6,#4527A0)", color:"#fff", fontWeight:600, cursor:"pointer", padding:"7px 16px", fontSize:14 }}
                     >💰 Add / Remove Funds</button>
                     <button
@@ -278,7 +310,15 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                       style={{ border:"1.5px solid #EBEBEB", borderRadius:10, background:"#FFFFFF", color:"#1A1A1A", fontWeight:500, cursor:"pointer", padding:"7px 16px", fontSize:14, display:"flex", alignItems:"center", gap:6 }}
                     >🔄 {refreshing ? "Refreshing..." : "Refresh Balance"}</button>
                     <button
-                      onClick={() => { setBanks(bs => bs.filter(b => b.id !== selectedBank.id)); setSelected(null); }}
+                      onClick={() => {
+                        const bal = parseInt(selectedBank?.balance?.replace(/[₹,]/g, "") || "0");
+                        if (bal > 0) {
+                          setShowDeleteGuard(true);
+                        } else {
+                          setBanks(bs => bs.filter(b => b.id !== selectedBank.id));
+                          setSelected(null);
+                        }
+                      }}
                       style={{ padding:"7px 16px", border:"1px solid #FECACA", borderRadius:10, background:"#FFF0F0", cursor:"pointer", fontWeight:500, fontSize:14, color:"#E83838" }}
                     >🗑 Delete</button>
                   </div>
@@ -588,67 +628,334 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
       )}
 
       {/* ── Funds Modal ── */}
-      {showFundsModal && !fundsProgress && (
+      {showFundsModal && (
         <div style={{
-          position:"fixed", inset:0, background:"rgba(26,26,26,0.45)",
-          display:"flex", alignItems:"center", justifyContent:"center", zIndex:2000,
+          position: "fixed", inset: 0,
+          background: "rgba(26,26,26,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 1000,
         }}>
           <div style={{
-            background:"#FFFFFF", borderRadius:16, padding:"36px 40px",
-            minWidth:380, boxShadow:"0 8px 40px rgba(0,0,0,0.18)",
+            background: "#FFFFFF",
+            borderRadius: 20,
+            width: 480,
+            boxShadow: "0 12px 48px rgba(0,0,0,0.15)",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
           }}>
-            {fundsSuccess ? (
-              <div style={{ textAlign:"center" }}>
-                <div style={{ fontSize:48, marginBottom:16 }}>✅</div>
-                <div style={{ fontWeight:700, fontSize:18, marginBottom:8 }}>
-                  {fundsType === "add" ? "Funds Added!" : "Funds Removed!"}
+
+            {/* Header */}
+            <div style={{
+              padding: "22px 28px",
+              borderBottom: "1px solid #EBEBEB",
+              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: 10,
+                  background: "linear-gradient(135deg,#9B59B6,#4527A0)",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
+                }}>💳</div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 18, color: "#1A1A1A" }}>
+                    Update Account Balance
+                  </div>
+                  <div style={{ fontSize: 13, color: "#8A8A8A", marginTop: 2 }}>
+                    {selectedBank?.account} · Virtual Account
+                  </div>
                 </div>
-                <div style={{ color:"#8A8A8A", marginBottom:24 }}>
-                  ₹{parseInt(fundsAmount || "0").toLocaleString("en-IN")} has been {fundsType === "add" ? "added to" : "removed from"} your virtual account.
-                </div>
-                <button onClick={() => setShowFundsModal(false)} style={{ border:"none", borderRadius:10, background:"linear-gradient(135deg,#9B59B6,#4527A0)", color:"#fff", fontWeight:600, cursor:"pointer", padding:"10px 28px", fontSize:15 }}>Done</button>
               </div>
-            ) : (
-              <>
-                <div style={{ fontWeight:700, fontSize:16, marginBottom:16 }}>
-                  {fundsType === "add" ? "Add Funds" : "Remove Funds"}
+              {!fundsProcessing && (
+                <button onClick={closeFundsModal} style={{
+                  background: "none", border: "none",
+                  fontSize: 20, cursor: "pointer", color: "#8A8A8A",
+                }}>✕</button>
+              )}
+            </div>
+
+            {/* Body */}
+            {!fundsSuccess ? (
+              <div style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: 16 }}>
+
+                {/* Action — Credit / Debit toggle */}
+                <div>
+                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 8, display: "block", fontWeight: 500 }}>
+                    Action <span style={{ color: "#E83838" }}>*</span>
+                  </label>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    {[
+                      { val: "Credit", label: "➕ Credit (Add Funds)",   bg: "#F0FFF4", border: "#276749", color: "#276749" },
+                      { val: "Debit",  label: "➖ Debit (Remove Funds)", bg: "#FFF0F0", border: "#E83838", color: "#E83838" },
+                    ].map(({ val, label, bg, border, color }) => (
+                      <div
+                        key={val}
+                        onClick={() => setFundsForm(f => ({ ...f, action: val }))}
+                        style={{
+                          flex: 1, padding: "10px 0",
+                          border: `1.5px solid ${fundsForm.action === val ? border : "#EBEBEB"}`,
+                          borderRadius: 8, textAlign: "center",
+                          cursor: "pointer", fontSize: 13, fontWeight: 600,
+                          background: fundsForm.action === val ? bg : "#FFFFFF",
+                          color: fundsForm.action === val ? color : "#8A8A8A",
+                          transition: "all 0.15s",
+                        }}
+                      >{label}</div>
+                    ))}
+                  </div>
                 </div>
-                <div style={{ display:"flex", gap:8, marginBottom:20 }}>
-                  {["add","remove"].map(t => (
-                    <button key={t} onClick={() => setFundsType(t)} style={{
-                      flex:1, padding:"8px 0", borderRadius:8, fontWeight:600, fontSize:14,
-                      cursor:"pointer",
-                      background: fundsType === t ? (t === "add" ? "#F0FFF4" : "#FFF0F0") : "#FFFFFF",
-                      color: fundsType === t ? (t === "add" ? "#276749" : "#E83838") : "#8A8A8A",
-                      border: `1.5px solid ${fundsType === t ? (t === "add" ? "#276749" : "#E83838") : "#EBEBEB"}`,
-                    }}>{t === "add" ? "+ Add Funds" : "− Remove Funds"}</button>
-                  ))}
-                </div>
-                <div style={{ marginBottom:20 }}>
-                  <label style={labelStyle}>Amount (₹)</label>
+
+                {/* Amount */}
+                <div>
+                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                    Amount (₹) <span style={{ color: "#E83838" }}>*</span>
+                  </label>
                   <input
-                    style={inputStyle} type="number" placeholder="Enter amount"
-                    value={fundsAmount} onChange={e => setFundsAmount(e.target.value)}
+                    type="number"
+                    placeholder="Enter transaction amount"
+                    value={fundsForm.amount}
+                    onChange={e => setFundsForm(f => ({ ...f, amount: e.target.value }))}
+                    style={{
+                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
+                      padding: "10px 12px", fontSize: 15, outline: "none",
+                      boxSizing: "border-box", background: "#FFFFFF", color: "#1A1A1A",
+                    }}
+                    onFocus={e => e.target.style.borderColor = "#7C3AED"}
+                    onBlur={e => e.target.style.borderColor = "#EBEBEB"}
                   />
                 </div>
-                <div style={{ display:"flex", gap:10 }}>
-                  <button onClick={() => setShowFundsModal(false)} style={{ flex:1, padding:"10px 0", border:"1.5px solid #EBEBEB", borderRadius:10, background:"#FFFFFF", color:"#1A1A1A", fontWeight:500, cursor:"pointer", fontSize:15 }}>Cancel</button>
-                  <button
-                    onClick={() => setFundsProgress(true)}
-                    style={{ flex:1, padding:"10px 0", border:"none", borderRadius:10, background:`linear-gradient(135deg,#9B59B6,${PURPLE})`, color:"#fff", fontWeight:600, cursor:"pointer", fontSize:15 }}
-                  >Confirm</button>
+
+                {/* Purpose */}
+                <div>
+                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                    Purpose <span style={{ color: "#E83838" }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Salary disbursement for March 2026"
+                    value={fundsForm.purpose}
+                    onChange={e => setFundsForm(f => ({ ...f, purpose: e.target.value }))}
+                    style={{
+                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
+                      padding: "10px 12px", fontSize: 15, outline: "none",
+                      boxSizing: "border-box", background: "#FFFFFF", color: "#1A1A1A",
+                    }}
+                    onFocus={e => e.target.style.borderColor = "#7C3AED"}
+                    onBlur={e => e.target.style.borderColor = "#EBEBEB"}
+                  />
                 </div>
-              </>
+
+                {/* Transfer Type */}
+                <div>
+                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                    Transfer Type <span style={{ color: "#E83838" }}>*</span>
+                  </label>
+                  <select
+                    value={fundsForm.transferType}
+                    onChange={e => setFundsForm(f => ({ ...f, transferType: e.target.value }))}
+                    style={{
+                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
+                      padding: "10px 12px", fontSize: 15, outline: "none",
+                      boxSizing: "border-box", background: "#FFFFFF",
+                      color: fundsForm.transferType ? "#1A1A1A" : "#8A8A8A",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <option value="">Select transfer type</option>
+                    {["IMPS", "NEFT", "RTGS", "UPI"].map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Bank Reference Number */}
+                <div>
+                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                    Bank Reference Number <span style={{ color: "#E83838" }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter bank transaction reference number"
+                    value={fundsForm.bankRefNumber}
+                    onChange={e => setFundsForm(f => ({ ...f, bankRefNumber: e.target.value }))}
+                    style={{
+                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
+                      padding: "10px 12px", fontSize: 15, outline: "none",
+                      boxSizing: "border-box", background: "#FFFFFF", color: "#1A1A1A",
+                    }}
+                    onFocus={e => e.target.style.borderColor = "#7C3AED"}
+                    onBlur={e => e.target.style.borderColor = "#EBEBEB"}
+                  />
+                  <div style={{ fontSize: 11, color: "#8A8A8A", marginTop: 4 }}>
+                    The reference number provided by your bank for this transaction.
+                  </div>
+                </div>
+
+                {/* Current Balance display */}
+                <div style={{
+                  background: "#F5F3FF", border: "1px solid #DDD6FE",
+                  borderRadius: 8, padding: "12px 14px",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                }}>
+                  <span style={{ fontSize: 13, color: "#7C3AED", fontWeight: 500 }}>Current Balance</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: "#4527A0" }}>
+                    {selectedBank?.balance}
+                  </span>
+                </div>
+
+                {/* Progress bar — shown when processing */}
+                {fundsProcessing && (
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#8A8A8A", marginBottom: 6 }}>
+                      <span>Processing transaction...</span>
+                      <span>{fundsProgress}%</span>
+                    </div>
+                    <div style={{ background: "#E5E7EB", borderRadius: 99, height: 6, overflow: "hidden" }}>
+                      <div style={{
+                        height: "100%", borderRadius: 99,
+                        background: "linear-gradient(135deg,#9B59B6,#4527A0)",
+                        width: `${fundsProgress}%`,
+                        transition: "width 0.05s linear",
+                      }} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer */}
+                <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
+                  {!fundsProcessing && (
+                    <button onClick={closeFundsModal} style={{
+                      flex: 1, border: "1px solid #EBEBEB", borderRadius: 8,
+                      background: "#FFFFFF", color: "#1A1A1A",
+                      fontWeight: 500, cursor: "pointer", padding: "11px", fontSize: 15,
+                    }}>Cancel</button>
+                  )}
+                  <button
+                    onClick={startFunds}
+                    disabled={
+                      !fundsForm.action || !fundsForm.amount ||
+                      !fundsForm.purpose || !fundsForm.transferType ||
+                      !fundsForm.bankRefNumber || fundsProcessing
+                    }
+                    style={{
+                      flex: 1, border: "none", borderRadius: 8,
+                      background: (!fundsForm.action || !fundsForm.amount || !fundsForm.purpose || !fundsForm.transferType || !fundsForm.bankRefNumber || fundsProcessing)
+                        ? "#E8E8E8"
+                        : "linear-gradient(135deg,#9B59B6,#4527A0)",
+                      color: (!fundsForm.action || !fundsForm.amount || !fundsForm.purpose || !fundsForm.transferType || !fundsForm.bankRefNumber || fundsProcessing)
+                        ? "#8A8A8A" : "#fff",
+                      fontWeight: 600, fontSize: 15,
+                      cursor: fundsProcessing ? "not-allowed" : "pointer",
+                      padding: "11px",
+                      boxShadow: "0 2px 8px rgba(69,39,160,0.2)",
+                    }}
+                  >
+                    {fundsProcessing ? "Processing..." : `Confirm ${fundsForm.action || "Transaction"}`}
+                  </button>
+                </div>
+
+              </div>
+            ) : (
+
+              /* Success screen */
+              <div style={{ padding: "32px 28px", textAlign: "center" }}>
+                <div style={{
+                  width: 60, height: 60, borderRadius: "50%",
+                  background: "#F0FFF4", border: "2px solid #B7EBC3",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 28, margin: "0 auto 16px",
+                }}>✅</div>
+                <div style={{ fontWeight: 700, fontSize: 18, color: "#1A1A1A", marginBottom: 6 }}>
+                  Transaction Recorded
+                </div>
+                <div style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 20 }}>
+                  ₹{parseInt(fundsForm.amount || 0).toLocaleString("en-IN")} has been{" "}
+                  {fundsForm.action === "Credit" ? "credited to" : "debited from"} your virtual account.
+                </div>
+                <div style={{
+                  background: "#F5F3FF", border: "1px solid #DDD6FE",
+                  borderRadius: 10, padding: "16px 20px", marginBottom: 20, textAlign: "left",
+                }}>
+                  {[
+                    ["Action",          fundsForm.action],
+                    ["Amount",          `₹${parseInt(fundsForm.amount || 0).toLocaleString("en-IN")}`],
+                    ["Purpose",         fundsForm.purpose],
+                    ["Transfer Type",   fundsForm.transferType],
+                    ["Bank Reference",  fundsForm.bankRefNumber],
+                    ["Updated Balance", selectedBank?.balance],
+                  ].map(([k, v]) => (
+                    <div key={k} style={{
+                      display: "flex", justifyContent: "space-between",
+                      padding: "8px 0", borderBottom: "1px solid #EDE9FE",
+                      fontSize: 13,
+                    }}>
+                      <span style={{ color: "#7C3AED", fontWeight: 500 }}>{k}</span>
+                      <span style={{ fontWeight: 600, color: "#1A1A1A" }}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={closeFundsModal} style={{
+                  border: "none", borderRadius: 8,
+                  background: "linear-gradient(135deg,#9B59B6,#4527A0)",
+                  color: "#fff", fontWeight: 600, cursor: "pointer",
+                  padding: "11px 32px", fontSize: 15,
+                }}>Done</button>
+              </div>
+
             )}
           </div>
         </div>
       )}
-
-      {fundsProgress && (
-        <ProgressPopup
-          label={fundsType === "add" ? "Adding funds…" : "Removing funds…"}
-          onDone={() => { setFundsProgress(false); setFundsSuccess(true); }}
-        />
+      {/* ── Delete Guard Modal ── */}
+      {showDeleteGuard && (
+        <div style={{
+          position:"fixed", inset:0, background:"rgba(0,0,0,0.45)",
+          display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000,
+        }}>
+          <div style={{
+            background:"#fff", borderRadius:16, padding:"32px 28px",
+            width:"100%", maxWidth:420, boxShadow:"0 8px 40px rgba(0,0,0,0.18)",
+            textAlign:"center",
+          }}>
+            <div style={{
+              width:56, height:56, borderRadius:"50%",
+              background:"#FFF4E5", display:"flex",
+              alignItems:"center", justifyContent:"center",
+              margin:"0 auto 20px", fontSize:26,
+            }}>
+              ⚠️
+            </div>
+            <h3 style={{ margin:"0 0 12px", fontSize:17, fontWeight:700, color:"#1A1A1A" }}>
+              Unable to Delete Account
+            </h3>
+            <p style={{ margin:"0 0 28px", fontSize:14, color:"#555", lineHeight:1.6 }}>
+              This account cannot be deleted as there are funds still available in it.
+              To proceed, please transfer all funds to another account first.
+            </p>
+            <div style={{ display:"flex", gap:12 }}>
+              <button
+                onClick={() => setShowDeleteGuard(false)}
+                style={{
+                  flex:1, padding:"11px 0", borderRadius:8,
+                  border:"1.5px solid #E0E0E0", background:"#fff",
+                  fontSize:14, fontWeight:600, color:"#555", cursor:"pointer",
+                }}
+              >Cancel</button>
+              <button
+                onClick={() => {
+                  setShowDeleteGuard(false);
+                  setShowFundsModal(true);
+                }}
+                style={{
+                  flex:1, padding:"11px 0", borderRadius:8,
+                  background:"linear-gradient(135deg,#7C3AED,#5B21B6)",
+                  border:"none", fontSize:14, fontWeight:600,
+                  color:"#fff", cursor:"pointer",
+                }}
+              >Transfer Funds</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

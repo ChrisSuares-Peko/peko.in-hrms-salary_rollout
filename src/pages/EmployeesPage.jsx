@@ -23,7 +23,6 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
     ACTIVE_EMPLOYEES.map(e => ({ ...e }))
   );
   const [editEmp, setEditEmp] = useState(null);
-  const [editForm, setEditForm] = useState({});
   const [selected, setSelected] = useState([]);
   const [showVerifyPopup, setShowVerifyPopup] = useState(false);
   const [showBeneficiaryPopup, setShowBeneficiaryPopup] = useState(false);
@@ -38,13 +37,12 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
     : [];
 
   const openEdit = (emp) => {
-    setEditForm({ name: emp.name, bank: emp.bank, originalBank: emp.bank, ifsc: "", remark: emp.remark, beneficiaryStatus: emp.beneficiaryStatus });
-    setEditEmp(emp);
+    setEditEmp({ ...emp, originalBank: emp.bank });
   };
 
-  const saveEdit = () => {
+  const handleSaveEmployee = (updatedEmp) => {
     setActiveEmps(prev => prev.map(e =>
-      e.id === editEmp.id ? { ...e, ...editForm } : e
+      e.id === updatedEmp.id ? { ...e, ...updatedEmp } : e
     ));
     setEditEmp(null);
   };
@@ -280,188 +278,186 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
           {/* Edit Side Panel */}
           {editEmp && (
             <div style={{
-              width: 360,
-              minWidth: 360,
-              background: "#FFFFFF",
-              borderLeft: "1px solid #EBEBEB",
-              display: "flex",
-              flexDirection: "column",
-              flexShrink: 0,
-              boxShadow: "-4px 0 24px rgba(0,0,0,0.08)",
-              zIndex: 10,
+              position: "fixed", top: 0, right: 0, height: "100vh", width: 400,
+              background: "#fff", boxShadow: "-4px 0 24px rgba(0,0,0,0.10)",
+              zIndex: 200, display: "flex", flexDirection: "column",
+              fontFamily: "inherit",
             }}>
 
               {/* Header */}
               <div style={{
-                padding: "18px 24px",
-                borderBottom: "1px solid #EBEBEB",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
+                padding: "20px 24px 16px",
+                borderBottom: "1.5px solid #F0F0F0",
               }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 18, color: "#1A1A1A" }}>
+                <div style={{
+                  display: "flex", alignItems: "center",
+                  justifyContent: "space-between", marginBottom: 12,
+                }}>
+                  <span style={{ fontSize: 18, fontWeight: 700, color: "#1A1A1A" }}>
                     Update Employee
+                  </span>
+                  <button
+                    onClick={() => setEditEmp(null)}
+                    style={{
+                      background: "none", border: "none", fontSize: 20,
+                      cursor: "pointer", color: "#888", lineHeight: 1,
+                    }}
+                  >×</button>
+                </div>
+
+                {/* Avatar row */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: "50%",
+                    background: "linear-gradient(135deg,#FF6B6B,#E03030)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 15, fontWeight: 700, color: "#fff", flexShrink: 0,
+                  }}>
+                    {editEmp.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
                   </div>
-                  <div style={{ fontSize: 13, color: "#8A8A8A", marginTop: 2 }}>
-                    {editEmp.id} · {editEmp.email}
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#1A1A1A" }}>
+                      {editEmp.name}
+                    </div>
+                    <div style={{ fontSize: 12, color: "#888", marginTop: 1 }}>
+                      {editEmp.email}
+                    </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => setEditEmp(null)}
-                  style={{
-                    background: "none", border: "none",
-                    fontSize: 20, cursor: "pointer", color: "#8A8A8A", lineHeight: 1,
-                  }}
-                >✕</button>
               </div>
 
-              {/* Form body */}
-              <div style={{ padding: "24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Scrollable Body */}
+              <div style={{
+                flex: 1, overflowY: "auto", padding: "20px 24px", display: "flex",
+                flexDirection: "column", gap: 16,
+              }}>
 
                 {/* Employee Name — read only */}
                 <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                  <label style={{
+                    fontSize: 12, fontWeight: 600, color: "#555",
+                    display: "block", marginBottom: 6,
+                  }}>
                     Employee Name
                   </label>
-                  <div style={{
-                    border: "1px solid #EBEBEB",
-                    borderRadius: 8,
-                    padding: "10px 12px",
-                    fontSize: 15,
-                    color: "#8A8A8A",
-                    background: "#FFFFFF",
-                  }}>
-                    {editForm.name}
-                  </div>
-                  <div style={{ fontSize: 11, color: "#8A8A8A", marginTop: 4 }}>
+                  <input
+                    value={editEmp.name}
+                    readOnly
+                    style={{
+                      width: "100%", padding: "10px 12px", borderRadius: 8,
+                      border: "1.5px solid #E8E8E8", background: "#F7F7F7",
+                      fontSize: 14, color: "#999", boxSizing: "border-box",
+                      cursor: "not-allowed",
+                    }}
+                  />
+                  <div style={{ fontSize: 11, color: "#AAA", marginTop: 4 }}>
                     Name cannot be edited here.
                   </div>
                 </div>
 
-                {/* Bank Account */}
+                {/* Bank Account Number */}
                 <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                  <label style={{
+                    fontSize: 12, fontWeight: 600, color: "#555",
+                    display: "block", marginBottom: 6,
+                  }}>
                     Bank Account Number
                   </label>
                   <input
-                    value={editForm.bank || ""}
-                    onChange={e => setEditForm(f => ({ ...f, bank: e.target.value }))}
+                    value={editEmp.bank}
+                    onChange={e => setEditEmp({ ...editEmp, bank: e.target.value })}
                     style={{
-                      width: "100%",
-                      border: `1px solid ${editForm.bank !== editForm.originalBank ? "#E83838" : "#EBEBEB"}`,
-                      borderRadius: 8,
-                      padding: "10px 12px",
-                      fontSize: 15,
+                      width: "100%", padding: "10px 12px", borderRadius: 8,
+                      border: editEmp.bank !== editEmp.originalBank
+                        ? "1.5px solid #E83838"
+                        : "1.5px solid #E0E0E0",
+                      background: editEmp.bank !== editEmp.originalBank ? "#FFF5F5" : "#fff",
+                      fontSize: 14, color: "#1A1A1A", boxSizing: "border-box",
                       outline: "none",
-                      boxSizing: "border-box",
-                      background: editForm.bank !== editForm.originalBank ? "#FFF8F8" : "#FFFFFF",
-                      color: "#1A1A1A",
                     }}
                   />
-                  {editForm.bank !== editForm.originalBank && (
+                  {editEmp.bank !== editEmp.originalBank && (
                     <button style={{
-                      marginTop: 8,
-                      width: "100%",
-                      border: "1.5px solid #E83838",
-                      borderRadius: 8,
-                      background: "#FFFFFF",
-                      color: "#E83838",
-                      fontWeight: 600,
+                      marginTop: 8, width: "100%", padding: "9px 0", borderRadius: 8,
+                      background: "linear-gradient(135deg,#FF6B6B,#E03030)",
+                      border: "none", color: "#fff", fontSize: 13, fontWeight: 600,
                       cursor: "pointer",
-                      padding: "8px 14px",
-                      fontSize: 13,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 6,
-                      boxSizing: "border-box",
                     }}>
-                      🔍 Initiate Account Verification
+                      Initiate Account Verification
                     </button>
                   )}
                 </div>
 
                 {/* IFSC Code */}
                 <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                  <label style={{
+                    fontSize: 12, fontWeight: 600, color: "#555",
+                    display: "block", marginBottom: 6,
+                  }}>
                     IFSC Code
                   </label>
                   <input
-                    value={editForm.ifsc || ""}
-                    onChange={e => setEditForm(f => ({ ...f, ifsc: e.target.value }))}
+                    value={editEmp.ifsc || ""}
+                    onChange={e => setEditEmp({ ...editEmp, ifsc: e.target.value })}
                     style={{
-                      width: "100%",
-                      border: "1px solid #EBEBEB",
-                      borderRadius: 8,
-                      padding: "10px 12px",
-                      fontSize: 15,
+                      width: "100%", padding: "10px 12px", borderRadius: 8,
+                      border: "1.5px solid #E0E0E0", background: "#fff",
+                      fontSize: 14, color: "#1A1A1A", boxSizing: "border-box",
                       outline: "none",
-                      boxSizing: "border-box",
-                      background: "#FFFFFF",
-                      color: "#1A1A1A",
                     }}
-                    onFocus={e => e.target.style.borderColor = "#E83838"}
-                    onBlur={e => e.target.style.borderColor = "#EBEBEB"}
                   />
                 </div>
 
                 {/* Remark */}
                 <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                  <label style={{
+                    fontSize: 12, fontWeight: 600, color: "#555",
+                    display: "block", marginBottom: 6,
+                  }}>
                     Remark
                   </label>
                   <input
-                    value={editForm.remark || ""}
-                    onChange={e => setEditForm(f => ({ ...f, remark: e.target.value }))}
-                    placeholder="Add a note..."
+                    value={editEmp.remark || ""}
+                    onChange={e => setEditEmp({ ...editEmp, remark: e.target.value })}
+                    placeholder="—"
                     style={{
-                      width: "100%",
-                      border: "1px solid #EBEBEB",
-                      borderRadius: 8,
-                      padding: "10px 12px",
-                      fontSize: 15,
+                      width: "100%", padding: "10px 12px", borderRadius: 8,
+                      border: "1.5px solid #E0E0E0", background: "#fff",
+                      fontSize: 14, color: "#1A1A1A", boxSizing: "border-box",
                       outline: "none",
-                      boxSizing: "border-box",
-                      background: "#FFFFFF",
-                      color: "#1A1A1A",
                     }}
-                    onFocus={e => e.target.style.borderColor = "#E83838"}
-                    onBlur={e => e.target.style.borderColor = "#EBEBEB"}
                   />
                 </div>
 
                 {/* Beneficiary Status */}
                 <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 8, display: "block", fontWeight: 500 }}>
+                  <label style={{
+                    fontSize: 12, fontWeight: 600, color: "#555",
+                    display: "block", marginBottom: 8,
+                  }}>
                     Beneficiary Status
                   </label>
                   <div style={{ display: "flex", gap: 8 }}>
-                    {[
-                      { val: "Added",   bg: "#F0FFF4", border: "#276749", color: "#276749" },
-                      { val: "Pending", bg: "#FFF7ED", border: "#C2410C", color: "#C2410C" },
-                      { val: "Failed",  bg: "#FFF0F0", border: "#FF4F4F", color: "#FF4F4F" },
-                    ].map(({ val, bg, border, color }) => (
-                      <div
-                        key={val}
-                        onClick={() => setEditForm(f => ({ ...f, beneficiaryStatus: val }))}
-                        style={{
-                          flex: 1,
-                          padding: "8px 0",
-                          border: `1.5px solid ${editForm.beneficiaryStatus === val ? border : "#EBEBEB"}`,
-                          borderRadius: 8,
-                          textAlign: "center",
-                          cursor: "pointer",
-                          fontSize: 13,
-                          fontWeight: 600,
-                          background: editForm.beneficiaryStatus === val ? bg : "#FFFFFF",
-                          color: editForm.beneficiaryStatus === val ? color : "#8A8A8A",
-                          transition: "all 0.15s",
-                        }}
-                      >
-                        {val}
-                      </div>
-                    ))}
+                    {["Added", "Pending", "Failed"].map(s => {
+                      const active = editEmp.beneficiaryStatus === s;
+                      const col = s === "Added" ? "#16A34A" : s === "Pending" ? "#D97706" : "#DC2626";
+                      return (
+                        <button
+                          key={s}
+                          onClick={() => setEditEmp({ ...editEmp, beneficiaryStatus: s })}
+                          style={{
+                            flex: 1, padding: "9px 0", borderRadius: 8, fontSize: 13,
+                            fontWeight: 600, cursor: "pointer",
+                            border: `1.5px solid ${active ? col : "#E0E0E0"}`,
+                            background: active ? col : "#fff",
+                            color: active ? "#fff" : "#888",
+                            transition: "all 0.15s",
+                          }}
+                        >
+                          {s}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -470,37 +466,24 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
               {/* Footer */}
               <div style={{
                 padding: "16px 24px",
-                borderTop: "1px solid #EBEBEB",
-                display: "flex",
-                gap: 10,
+                borderTop: "1.5px solid #F0F0F0",
+                display: "flex", gap: 12,
               }}>
                 <button
                   onClick={() => setEditEmp(null)}
                   style={{
-                    flex: 1,
-                    border: "1px solid #EBEBEB",
-                    borderRadius: 8,
-                    background: "#FFFFFF",
-                    color: "#1A1A1A",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    padding: "11px",
-                    fontSize: 15,
+                    flex: 1, padding: "11px 0", borderRadius: 8,
+                    border: "1.5px solid #E0E0E0", background: "#fff",
+                    fontSize: 14, fontWeight: 600, color: "#555", cursor: "pointer",
                   }}
                 >Cancel</button>
                 <button
-                  onClick={saveEdit}
+                  onClick={() => handleSaveEmployee(editEmp)}
                   style={{
-                    flex: 1,
-                    border: "none",
-                    borderRadius: 8,
-                    background: "linear-gradient(135deg,#FF6B6B 0%,#E03030 60%,#C62828 100%)",
-                    color: "#fff",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    padding: "11px",
-                    fontSize: 15,
-                    boxShadow: "0 2px 8px rgba(200,40,40,0.25)",
+                    flex: 1, padding: "11px 0", borderRadius: 8,
+                    background: "linear-gradient(135deg,#FF6B6B,#E03030)",
+                    border: "none", fontSize: 14, fontWeight: 600,
+                    color: "#fff", cursor: "pointer",
                   }}
                 >Save Changes</button>
               </div>
