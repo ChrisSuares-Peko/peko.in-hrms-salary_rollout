@@ -26,7 +26,10 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
   // Funds modal
   const [showFundsModal, setShowFundsModal] = useState(false);
   const [showDeleteGuard, setShowDeleteGuard] = useState(false);
-  const [fundsForm, setFundsForm] = useState({ action:"Credit", amount:"", purpose:"", transferType:"", bankRefNumber:"" });
+  const [fundsForm, setFundsForm] = useState({ action:"Credit" });
+  const [fundsAmount, setFundsAmount] = useState("");
+  const [fundsPurpose, setFundsPurpose] = useState("");
+  const [fundsTransferType, setFundsTransferType] = useState("");
   const [fundsProcessing, setFundsProcessing] = useState(false);
   const [fundsProgress, setFundsProgress] = useState(0);
   const [fundsSuccess, setFundsSuccess] = useState(false);
@@ -41,7 +44,10 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
 
   const closeFundsModal = () => {
     setShowFundsModal(false);
-    setFundsForm({ action:"Credit", amount:"", purpose:"", transferType:"", bankRefNumber:"" });
+    setFundsForm({ action:"Credit" });
+    setFundsAmount("");
+    setFundsPurpose("");
+    setFundsTransferType("");
     setFundsProcessing(false);
     setFundsSuccess(false);
     setFundsProgress(0);
@@ -58,7 +64,7 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
         setTimeout(() => {
           setFundsProcessing(false);
           setFundsSuccess(true);
-          const amt = parseInt(fundsForm.amount || 0);
+          const amt = parseInt(fundsAmount || 0);
           setBanks(bs => bs.map(b => {
             if (b.id !== selected) return b;
             const cur = parseInt(b.balance.replace(/[₹,]/g, ""));
@@ -706,89 +712,84 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                 </div>
 
                 {/* Amount */}
-                <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: "#555", display: "block", marginBottom: 6 }}>
                     Amount (₹) <span style={{ color: "#E83838" }}>*</span>
                   </label>
                   <input
                     type="number"
+                    value={fundsAmount}
+                    onChange={e => setFundsAmount(e.target.value)}
                     placeholder="Enter transaction amount"
-                    value={fundsForm.amount}
-                    onChange={e => setFundsForm(f => ({ ...f, amount: e.target.value }))}
                     style={{
-                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
-                      padding: "10px 12px", fontSize: 15, outline: "none",
-                      boxSizing: "border-box", background: "#FFFFFF", color: "#1A1A1A",
+                      width: "100%", padding: "10px 12px", borderRadius: 8,
+                      border: "1.5px solid #E0E0E0", fontSize: 14,
+                      color: "#1A1A1A", boxSizing: "border-box", outline: "none",
                     }}
-                    onFocus={e => e.target.style.borderColor = "#7C3AED"}
-                    onBlur={e => e.target.style.borderColor = "#EBEBEB"}
                   />
                 </div>
 
                 {/* Purpose */}
-                <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: "#555", display: "block", marginBottom: 6 }}>
                     Purpose <span style={{ color: "#E83838" }}>*</span>
                   </label>
                   <input
                     type="text"
+                    value={fundsPurpose}
+                    onChange={e => setFundsPurpose(e.target.value)}
                     placeholder="e.g. Salary disbursement for March 2026"
-                    value={fundsForm.purpose}
-                    onChange={e => setFundsForm(f => ({ ...f, purpose: e.target.value }))}
                     style={{
-                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
-                      padding: "10px 12px", fontSize: 15, outline: "none",
-                      boxSizing: "border-box", background: "#FFFFFF", color: "#1A1A1A",
+                      width: "100%", padding: "10px 12px", borderRadius: 8,
+                      border: "1.5px solid #E0E0E0", fontSize: 14,
+                      color: "#1A1A1A", boxSizing: "border-box", outline: "none",
                     }}
-                    onFocus={e => e.target.style.borderColor = "#7C3AED"}
-                    onBlur={e => e.target.style.borderColor = "#EBEBEB"}
+                  />
+                </div>
+
+                {/* Account Number — read only */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: "#555", display: "block", marginBottom: 6 }}>
+                    Account Number
+                  </label>
+                  <input
+                    type="text"
+                    value={selectedBank?.account || "VA9823401567"}
+                    readOnly
+                    style={{
+                      width: "100%", padding: "10px 12px", borderRadius: 8,
+                      border: "1.5px solid #E8E8E8", background: "#F7F7F7",
+                      fontSize: 14, color: "#999", boxSizing: "border-box",
+                      cursor: "not-allowed",
+                    }}
                   />
                 </div>
 
                 {/* Transfer Type */}
-                <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: "#555", display: "block", marginBottom: 6 }}>
                     Transfer Type <span style={{ color: "#E83838" }}>*</span>
                   </label>
                   <select
-                    value={fundsForm.transferType}
-                    onChange={e => setFundsForm(f => ({ ...f, transferType: e.target.value }))}
+                    value={fundsTransferType}
+                    onChange={e => setFundsTransferType(e.target.value)}
                     style={{
-                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
-                      padding: "10px 12px", fontSize: 15, outline: "none",
-                      boxSizing: "border-box", background: "#FFFFFF",
-                      color: fundsForm.transferType ? "#1A1A1A" : "#8A8A8A",
-                      cursor: "pointer",
+                      width: "100%", padding: "10px 12px", borderRadius: 8,
+                      border: "1.5px solid #E0E0E0", fontSize: 14,
+                      color: fundsTransferType ? "#1A1A1A" : "#AAA",
+                      background: "#fff", boxSizing: "border-box", outline: "none",
+                      appearance: "none",
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 12px center",
                     }}
                   >
-                    <option value="">Select transfer type</option>
-                    {["IMPS", "NEFT", "RTGS", "UPI"].map(t => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
+                    <option value="" disabled>Select transfer type</option>
+                    <option value="IMPS">IMPS</option>
+                    <option value="NEFT">NEFT</option>
+                    <option value="RTGS">RTGS</option>
+                    <option value="UPI">UPI</option>
                   </select>
-                </div>
-
-                {/* Bank Reference Number */}
-                <div>
-                  <label style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 6, display: "block", fontWeight: 500 }}>
-                    Bank Reference Number <span style={{ color: "#E83838" }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter bank transaction reference number"
-                    value={fundsForm.bankRefNumber}
-                    onChange={e => setFundsForm(f => ({ ...f, bankRefNumber: e.target.value }))}
-                    style={{
-                      width: "100%", border: "1px solid #EBEBEB", borderRadius: 8,
-                      padding: "10px 12px", fontSize: 15, outline: "none",
-                      boxSizing: "border-box", background: "#FFFFFF", color: "#1A1A1A",
-                    }}
-                    onFocus={e => e.target.style.borderColor = "#7C3AED"}
-                    onBlur={e => e.target.style.borderColor = "#EBEBEB"}
-                  />
-                  <div style={{ fontSize: 11, color: "#8A8A8A", marginTop: 4 }}>
-                    The reference number provided by your bank for this transaction.
-                  </div>
                 </div>
 
                 {/* Current Balance display */}
@@ -832,17 +833,13 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                   )}
                   <button
                     onClick={startFunds}
-                    disabled={
-                      !fundsForm.action || !fundsForm.amount ||
-                      !fundsForm.purpose || !fundsForm.transferType ||
-                      !fundsForm.bankRefNumber || fundsProcessing
-                    }
+                    disabled={!fundsAmount || !fundsPurpose || !fundsTransferType || fundsProcessing}
                     style={{
                       flex: 1, border: "none", borderRadius: 8,
-                      background: (!fundsForm.action || !fundsForm.amount || !fundsForm.purpose || !fundsForm.transferType || !fundsForm.bankRefNumber || fundsProcessing)
+                      background: (!fundsAmount || !fundsPurpose || !fundsTransferType || fundsProcessing)
                         ? "#E8E8E8"
                         : "linear-gradient(135deg,#9B59B6,#4527A0)",
-                      color: (!fundsForm.action || !fundsForm.amount || !fundsForm.purpose || !fundsForm.transferType || !fundsForm.bankRefNumber || fundsProcessing)
+                      color: (!fundsAmount || !fundsPurpose || !fundsTransferType || fundsProcessing)
                         ? "#8A8A8A" : "#fff",
                       fontWeight: 600, fontSize: 15,
                       cursor: fundsProcessing ? "not-allowed" : "pointer",
@@ -869,7 +866,7 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                   Transaction Recorded
                 </div>
                 <div style={{ fontSize: 13, color: "#8A8A8A", marginBottom: 20 }}>
-                  ₹{parseInt(fundsForm.amount || 0).toLocaleString("en-IN")} has been{" "}
+                  ₹{parseInt(fundsAmount || 0).toLocaleString("en-IN")} has been{" "}
                   {fundsForm.action === "Credit" ? "credited to" : "debited from"} your virtual account.
                 </div>
                 <div style={{
@@ -878,10 +875,9 @@ export default function ManageBanksPage({ dummyMode, onNavigate }) {
                 }}>
                   {[
                     ["Action",          fundsForm.action],
-                    ["Amount",          `₹${parseInt(fundsForm.amount || 0).toLocaleString("en-IN")}`],
-                    ["Purpose",         fundsForm.purpose],
-                    ["Transfer Type",   fundsForm.transferType],
-                    ["Bank Reference",  fundsForm.bankRefNumber],
+                    ["Amount",          `₹${parseInt(fundsAmount || 0).toLocaleString("en-IN")}`],
+                    ["Purpose",         fundsPurpose],
+                    ["Transfer Type",   fundsTransferType],
                     ["Updated Balance", selectedBank?.balance],
                   ].map(([k, v]) => (
                     <div key={k} style={{
