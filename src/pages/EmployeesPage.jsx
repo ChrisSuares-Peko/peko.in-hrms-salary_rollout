@@ -151,7 +151,7 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                             style={{ width: 15, height: 15, accentColor: "#E83838", cursor: "pointer" }}
                           />
                         </th>
-                        {["Employee","ID","Joining","Salary","Bank Account","Status","Beneficiary","Remark",""].map((h, i) => (
+                        {["Employee","ID","Joining","Salary","Account Detail","Transaction Type","Status","Beneficiary","Remark",""].map((h, i) => (
                           <th key={i} style={{ ...thStyle, textAlign: "left" }}>{h}</th>
                         ))}
                       </tr>
@@ -184,7 +184,31 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                           <td style={tdStyle(i)}><span style={{ fontSize: FS.sm }}>{emp.id}</span></td>
                           <td style={tdStyle(i)}><span style={{ fontSize: FS.sm }}>{emp.joining}</span></td>
                           <td style={tdStyle(i)}><span style={{ fontWeight: 600, fontSize: FS.sm }}>{emp.salary}</span></td>
-                          <td style={tdStyle(i)}><span style={{ fontSize: FS.sm }}>{emp.bank}</span></td>
+                          <td style={tdStyle(i)}>
+                            <div style={{ fontSize: 13, color: "#1A1A1A" }}>
+                              {emp.transactionType === "UPI" && emp.upiId
+                                ? emp.upiId
+                                : emp.bank || "—"}
+                            </div>
+                            <div style={{ fontSize: 11, color: "#AAA", marginTop: 2 }}>
+                              {emp.transactionType === "UPI" && emp.upiId ? "UPI ID" : "Account No."}
+                            </div>
+                          </td>
+                          <td style={tdStyle(i)}>
+                            <span style={{
+                              fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20,
+                              background:
+                                emp.transactionType === "UPI"  ? "#EEF2FF" :
+                                emp.transactionType === "IMPS" ? "#FFF7ED" :
+                                emp.transactionType === "NEFT" ? "#F0FDF4" : "#F5F3FF",
+                              color:
+                                emp.transactionType === "UPI"  ? "#4F46E5" :
+                                emp.transactionType === "IMPS" ? "#D97706" :
+                                emp.transactionType === "NEFT" ? "#16A34A" : "#7C3AED",
+                            }}>
+                              {emp.transactionType || "—"}
+                            </span>
+                          </td>
                           <td style={tdStyle(i)}>
                             <span style={{
                               ...STATUS_STYLE[emp.status],
@@ -387,6 +411,58 @@ export default function EmployeesPage({ dummyMode, onNavigate }) {
                     </button>
                   )}
                 </div>
+
+                {/* Transaction Type */}
+                <div>
+                  <label style={{
+                    fontSize: 12, fontWeight: 600, color: "#555",
+                    display: "block", marginBottom: 6,
+                  }}>
+                    Transaction Type
+                  </label>
+                  <select
+                    value={editEmp.transactionType || ""}
+                    onChange={e => setEditEmp({ ...editEmp, transactionType: e.target.value })}
+                    style={{
+                      width: "100%", padding: "10px 12px", borderRadius: 8,
+                      border: "1.5px solid #E0E0E0", background: "#fff",
+                      fontSize: 14, color: "#1A1A1A", boxSizing: "border-box",
+                      outline: "none", appearance: "none",
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center",
+                    }}
+                  >
+                    <option value="" disabled>Select type</option>
+                    <option value="UPI">UPI</option>
+                    <option value="IMPS">IMPS</option>
+                    <option value="NEFT">NEFT</option>
+                    <option value="RTGS">RTGS</option>
+                  </select>
+                </div>
+
+                {/* UPI ID — only shown when Transaction Type is UPI */}
+                {editEmp.transactionType === "UPI" && (
+                  <div>
+                    <label style={{
+                      fontSize: 12, fontWeight: 600, color: "#555",
+                      display: "block", marginBottom: 6,
+                    }}>
+                      UPI ID
+                    </label>
+                    <input
+                      type="text"
+                      value={editEmp.upiId || ""}
+                      onChange={e => setEditEmp({ ...editEmp, upiId: e.target.value })}
+                      placeholder="e.g. name@okaxis"
+                      style={{
+                        width: "100%", padding: "10px 12px", borderRadius: 8,
+                        border: "1.5px solid #E0E0E0", background: "#fff",
+                        fontSize: 14, color: "#1A1A1A", boxSizing: "border-box",
+                        outline: "none",
+                      }}
+                    />
+                  </div>
+                )}
 
                 {/* IFSC Code */}
                 <div>

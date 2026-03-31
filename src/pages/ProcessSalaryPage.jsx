@@ -155,8 +155,8 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
                     <table style={{ width: "100%", borderCollapse: "collapse" }}>
                       <thead>
                         <tr>
-                          {["EMP ID", "EMPLOYEE NAME & EMAIL", "BANK ACCOUNT", "GROSS SALARY",
-                            "DEDUCTIONS", "TOTAL", "REMARK", "STATUS", "ACTIONS"].map(h => (
+                          {["EMP ID", "EMPLOYEE NAME & EMAIL", "ACCOUNT DETAIL", "TRANS. TYPE",
+                            "GROSS SALARY", "DEDUCTIONS", "TOTAL", "REMARK", "STATUS", "ACTIONS"].map(h => (
                             <th key={h} style={thStyle}>{h}</th>
                           ))}
                         </tr>
@@ -178,7 +178,29 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
                                 </div>
                               </td>
                               <td style={tdStyle(i, excluded)}>
-                                <span style={{ fontSize: 13 }}>{row.bank}</span>
+                                <div style={{ fontSize: 13, color: "#1A1A1A" }}>
+                                  {row.transactionType === "UPI" && row.upiId
+                                    ? row.upiId
+                                    : row.bank || "—"}
+                                </div>
+                                <div style={{ fontSize: 11, color: "#AAA", marginTop: 2 }}>
+                                  {row.transactionType === "UPI" && row.upiId ? "UPI ID" : "Account No."}
+                                </div>
+                              </td>
+                              <td style={tdStyle(i, excluded)}>
+                                <span style={{
+                                  fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20,
+                                  background:
+                                    row.transactionType === "UPI"  ? "#EEF2FF" :
+                                    row.transactionType === "IMPS" ? "#FFF7ED" :
+                                    row.transactionType === "NEFT" ? "#F0FDF4" : "#F5F3FF",
+                                  color:
+                                    row.transactionType === "UPI"  ? "#4F46E5" :
+                                    row.transactionType === "IMPS" ? "#D97706" :
+                                    row.transactionType === "NEFT" ? "#16A34A" : "#7C3AED",
+                                }}>
+                                  {row.transactionType || "—"}
+                                </span>
                               </td>
                               <td style={tdStyle(i, excluded)}>
                                 <strong>{row.salary}</strong>

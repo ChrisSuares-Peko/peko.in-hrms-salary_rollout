@@ -83,7 +83,7 @@ export default function SalaryHistoryDetailPage({ dummyMode, row, onBack }) {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
-                {["Emp ID","Employee","Bank Account","Gross Salary","Deductions","Net Salary","Remark","Status"].map((h, i) => (
+                {["Emp ID","Employee","Account Detail","Trans. Type","Gross Salary","Deductions","Net Salary","Remark","Status"].map((h, i) => (
                   <th key={i} style={thStyle}>{h}</th>
                 ))}
               </tr>
@@ -93,7 +93,31 @@ export default function SalaryHistoryDetailPage({ dummyMode, row, onBack }) {
                 <tr key={emp.id}>
                   <td style={tdStyle(i)}>{emp.id}</td>
                   <td style={tdStyle(i)}><strong>{emp.name}</strong></td>
-                  <td style={tdStyle(i)}>{emp.bank}</td>
+                  <td style={tdStyle(i)}>
+                    <div style={{ fontSize: 13, color: "#1A1A1A" }}>
+                      {emp.transactionType === "UPI" && emp.upiId
+                        ? emp.upiId
+                        : emp.bank || "—"}
+                    </div>
+                    <div style={{ fontSize: 11, color: "#AAA", marginTop: 2 }}>
+                      {emp.transactionType === "UPI" && emp.upiId ? "UPI ID" : "Account No."}
+                    </div>
+                  </td>
+                  <td style={tdStyle(i)}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20,
+                      background:
+                        emp.transactionType === "UPI"  ? "#EEF2FF" :
+                        emp.transactionType === "IMPS" ? "#FFF7ED" :
+                        emp.transactionType === "NEFT" ? "#F0FDF4" : "#F5F3FF",
+                      color:
+                        emp.transactionType === "UPI"  ? "#4F46E5" :
+                        emp.transactionType === "IMPS" ? "#D97706" :
+                        emp.transactionType === "NEFT" ? "#16A34A" : "#7C3AED",
+                    }}>
+                      {emp.transactionType || "—"}
+                    </span>
+                  </td>
                   <td style={tdStyle(i)}>{emp.gross}</td>
                   <td style={tdStyle(i)}><span style={{ color: C.red }}>{emp.deductions}</span></td>
                   <td style={tdStyle(i)}><strong>{emp.total}</strong></td>

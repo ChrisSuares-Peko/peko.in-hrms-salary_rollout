@@ -1,19 +1,19 @@
 export const SALARY_ROWS = [
   { id:"EMP001", name:"Ravi Kumar",    bank:"HDFC – XXXX1234",
     salary:"₹85,000", deductions:"₹12,750", total:"₹72,250",
-    remark:"Account Verified",             status:"Unpaid" },
+    remark:"Account Verified",             status:"Unpaid", transactionType:"NEFT", upiId:"" },
   { id:"EMP002", name:"Priya Sharma",  bank:"ICICI – XXXX5678",
     salary:"₹62,000", deductions:"₹9,300",  total:"₹52,700",
-    remark:"Account Verification Pending", status:"Unpaid" },
+    remark:"Account Verification Pending", status:"Unpaid", transactionType:"UPI", upiId:"priya@oksbi" },
   { id:"EMP003", name:"Anjali Mehta",  bank:"SBI – XXXX9012",
     salary:"₹74,000", deductions:"₹11,100", total:"₹62,900",
-    remark:"Account Verified",             status:"Unpaid" },
+    remark:"Account Verified",             status:"Unpaid", transactionType:"IMPS", upiId:"" },
   { id:"EMP004", name:"Suresh Pillai", bank:"HDFC – XXXX3456",
     salary:"₹91,000", deductions:"₹13,650", total:"₹77,350",
-    remark:"Account Verified",             status:"Unpaid" },
+    remark:"Account Verified",             status:"Unpaid", transactionType:"RTGS", upiId:"" },
   { id:"EMP005", name:"Neha Joshi",    bank:"ICICI – XXXX7890",
     salary:"₹55,000", deductions:"₹8,250",  total:"₹46,750",
-    remark:"Account Verification Pending", status:"Unpaid" },
+    remark:"Account Verification Pending", status:"Unpaid", transactionType:"UPI", upiId:"neha@okaxis" },
 ];
 
 export const PROCESS_MONTHS = [
@@ -44,15 +44,15 @@ export const HISTORY_DATA = {
 
 export const HISTORY_DETAIL = [
   { id:"EMP001", name:"Ravi Kumar",    bank:"HDFC – XXXX1234",
-    gross:"₹85,000", deductions:"₹12,750", total:"₹72,250", remark:"—",       status:"Paid"    },
+    gross:"₹85,000", deductions:"₹12,750", total:"₹72,250", remark:"—",       status:"Paid",    transactionType:"NEFT", upiId:"" },
   { id:"EMP002", name:"Priya Sharma",  bank:"ICICI – XXXX5678",
-    gross:"₹62,000", deductions:"₹9,300",  total:"₹52,700", remark:"Pending", status:"Pending" },
+    gross:"₹62,000", deductions:"₹9,300",  total:"₹52,700", remark:"Pending", status:"Pending", transactionType:"UPI", upiId:"priya@oksbi" },
   { id:"EMP003", name:"Anjali Mehta",  bank:"SBI – XXXX9012",
-    gross:"₹74,000", deductions:"₹11,100", total:"₹62,900", remark:"—",       status:"Paid"    },
+    gross:"₹74,000", deductions:"₹11,100", total:"₹62,900", remark:"—",       status:"Paid",    transactionType:"IMPS", upiId:"" },
   { id:"EMP004", name:"Suresh Pillai", bank:"HDFC – XXXX3456",
-    gross:"₹91,000", deductions:"₹13,650", total:"₹77,350", remark:"—",       status:"Paid"    },
+    gross:"₹91,000", deductions:"₹13,650", total:"₹77,350", remark:"—",       status:"Paid",    transactionType:"RTGS", upiId:"" },
   { id:"EMP005", name:"Neha Joshi",    bank:"ICICI – XXXX7890",
-    gross:"₹55,000", deductions:"₹8,250",  total:"₹46,750", remark:"Pending", status:"Pending" },
+    gross:"₹55,000", deductions:"₹8,250",  total:"₹46,750", remark:"Pending", status:"Pending", transactionType:"UPI", upiId:"neha@okaxis" },
 ];
 
 export const STATS_MONTHS = [
