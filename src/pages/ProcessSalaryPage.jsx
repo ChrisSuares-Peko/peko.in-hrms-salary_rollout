@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import Breadcrumb from "../components/Breadcrumb";
@@ -12,6 +12,77 @@ const STATUS_STYLE = {
   Excluded: { bg: "#F3F4F6", color: "#9CA3AF" },
 };
 
+const BreakdownPopover = ({ items, total, type, onClose }) => {
+  const isGross = type === "gross";
+  const accentColor = isGross ? "#16A34A" : "#E83838";
+  const bgAccent = isGross ? "#F0FDF4" : "#FFF0F0";
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: "calc(100% + 8px)",
+        left: "50%",
+        transform: "translateX(-50%)",
+        background: "#ffffff",
+        borderRadius: 12,
+        boxShadow: "0 8px 32px rgba(0,0,0,0.16)",
+        border: "1px solid #F0F0F0",
+        padding: "14px 16px",
+        minWidth: 220,
+        zIndex: 500,
+      }}
+      onClick={e => e.stopPropagation()}
+    >
+      {/* Arrow */}
+      <div style={{
+        position: "absolute", top: -6, left: "50%",
+        transform: "translateX(-50%) rotate(45deg)",
+        width: 12, height: 12,
+        background: "#ffffff",
+        border: "1px solid #F0F0F0",
+        borderRight: "none", borderBottom: "none",
+      }} />
+
+      {/* Title */}
+      <div style={{
+        fontSize: 11, fontWeight: 700, color: accentColor,
+        textTransform: "uppercase", letterSpacing: "0.5px",
+        marginBottom: 10,
+      }}>
+        {isGross ? "Gross Salary Breakdown" : "Deductions Breakdown"}
+      </div>
+
+      {/* Line items */}
+      {items.map((item, i) => (
+        <div key={i} style={{
+          display: "flex", justifyContent: "space-between",
+          alignItems: "center", padding: "5px 0",
+          borderBottom: i < items.length - 1 ? "1px solid #F5F5F5" : "none",
+        }}>
+          <span style={{ fontSize: 12, color: "#555" }}>{item.label}</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#1A1A1A" }}>
+            ₹{item.amount.toLocaleString("en-IN")}
+          </span>
+        </div>
+      ))}
+
+      {/* Total row */}
+      <div style={{
+        display: "flex", justifyContent: "space-between",
+        alignItems: "center", marginTop: 8,
+        padding: "7px 10px", borderRadius: 8,
+        background: bgAccent,
+      }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: accentColor }}>Total</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: accentColor }}>
+          ₹{total.toLocaleString("en-IN")}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
   const [rows, setRows] = useState(SALARY_ROWS.map(r => ({ ...r })));
   const [selectedMonth, setSelectedMonth] = useState("Mar 2026");
@@ -21,6 +92,7 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
   const [verified, setVerified] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
+  const [activePopover, setActivePopover] = useState(null);
 
   const activeRows = rows.filter(r => r.status !== "Excluded");
   const totalSalary = dummyMode
@@ -62,6 +134,26 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
     } : r));
     setEditRow(null);
   };
+
+  const getBreakdown = (gross, deduction) => ({
+    gross: [
+      { label: "Basic Salary",     amount: Math.round(gross * 0.50) },
+      { label: "HRA",              amount: Math.round(gross * 0.25) },
+      { label: "Other Allowances", amount: Math.round(gross * 0.15) },
+      { label: "Bonus",            amount: Math.round(gross * 0.10) },
+    ],
+    deduction: [
+      { label: "Professional Tax", amount: Math.round(deduction * 0.10) },
+      { label: "EPF Contribution", amount: Math.round(deduction * 0.60) },
+      { label: "Insurance",        amount: Math.round(deduction * 0.30) },
+    ],
+  });
+
+  useEffect(() => {
+    const handleClickOutside = () => setActivePopover(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   const thStyle = {
     padding: "11px 14px", textAlign: "left",
@@ -202,11 +294,87 @@ export default function ProcessSalaryPage({ dummyMode, onNavigate }) {
                                   {row.transactionType || "—"}
                                 </span>
                               </td>
-                              <td style={tdStyle(i, excluded)}>
-                                <strong>{row.salary}</strong>
+                              <td style={{ ...tdStyle(i, excluded), position: "relative" }}>
+                                {(() => {
+                                  const grossNum = parseInt((row.salary || "0").replace(/[₹,]/g, ""), 10) || 0;
+                                  const dedNum   = parseInt((row.deductions || "0").replace(/[₹,]/g, ""), 10) || 0;
+                                  return (
+                                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                      <strong>{row.salary}</strong>
+                                      <span
+                                        title="View breakdown"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          setActivePopover(
+                                            activePopover?.empId === row.id && activePopover?.type === "gross"
+                                              ? null
+                                              : { empId: row.id, type: "gross" }
+                                          );
+                                        }}
+                                        style={{
+                                          fontSize: 11, fontWeight: 700,
+                                          color: "#ffffff", background: "#16A34A",
+                                          borderRadius: "50%", width: 16, height: 16,
+                                          display: "inline-flex", alignItems: "center",
+                                          justifyContent: "center", cursor: "pointer",
+                                          flexShrink: 0, marginBottom: 6,
+                                          alignSelf: "flex-start",
+                                          userSelect: "none",
+                                          boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+                                        }}
+                                      >i</span>
+                                      {activePopover?.empId === row.id && activePopover?.type === "gross" && (
+                                        <BreakdownPopover
+                                          type="gross"
+                                          items={getBreakdown(grossNum, dedNum).gross}
+                                          total={grossNum}
+                                          onClose={() => setActivePopover(null)}
+                                        />
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </td>
-                              <td style={tdStyle(i, excluded)}>
-                                <span style={{ color: "#E83838" }}>{row.deductions}</span>
+                              <td style={{ ...tdStyle(i, excluded), position: "relative" }}>
+                                {(() => {
+                                  const grossNum = parseInt((row.salary || "0").replace(/[₹,]/g, ""), 10) || 0;
+                                  const dedNum   = parseInt((row.deductions || "0").replace(/[₹,]/g, ""), 10) || 0;
+                                  return (
+                                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                      <span style={{ color: "#E83838", fontWeight: 600 }}>{row.deductions}</span>
+                                      <span
+                                        title="View breakdown"
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          setActivePopover(
+                                            activePopover?.empId === row.id && activePopover?.type === "deduction"
+                                              ? null
+                                              : { empId: row.id, type: "deduction" }
+                                          );
+                                        }}
+                                        style={{
+                                          fontSize: 11, fontWeight: 700,
+                                          color: "#ffffff", background: "#E83838",
+                                          borderRadius: "50%", width: 16, height: 16,
+                                          display: "inline-flex", alignItems: "center",
+                                          justifyContent: "center", cursor: "pointer",
+                                          flexShrink: 0, marginBottom: 6,
+                                          alignSelf: "flex-start",
+                                          userSelect: "none",
+                                          boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+                                        }}
+                                      >i</span>
+                                      {activePopover?.empId === row.id && activePopover?.type === "deduction" && (
+                                        <BreakdownPopover
+                                          type="deduction"
+                                          items={getBreakdown(grossNum, dedNum).deduction}
+                                          total={dedNum}
+                                          onClose={() => setActivePopover(null)}
+                                        />
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </td>
                               <td style={tdStyle(i, excluded)}>
                                 <strong>{row.total}</strong>
