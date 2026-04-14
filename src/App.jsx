@@ -1,6 +1,7 @@
 import { useState } from "react";
 import LandingPage           from "./pages/LandingPage";
 import SetupPage             from "./pages/SetupPage";
+import AccountSetupPage      from "./pages/AccountSetupPage";
 import DashboardPage         from "./pages/DashboardPage";
 import EmployeesPage         from "./pages/EmployeesPage";
 import ProcessSalaryPage     from "./pages/ProcessSalaryPage";
@@ -26,6 +27,8 @@ export default function App() {
       {page === "stats"     && <SalaryStatsPage     dummyMode={dummyMode} onNavigate={setPage} />}
       {page === "banks"     && <ManageBanksPage     dummyMode={dummyMode} onNavigate={setPage} />}
       {page === "reports"   && <GenerateReportsPage dummyMode={dummyMode} onNavigate={setPage} />}
+      {page === "account-setup-bank"    && <AccountSetupPage type="bank"    dummyMode={dummyMode} onNavigate={setPage} />}
+      {page === "account-setup-virtual" && <AccountSetupPage type="virtual" dummyMode={dummyMode} onNavigate={setPage} />}
 
       <PageNavigator   currentPage={page} onNavigate={setPage} />
       <DummyModeToggle dummyMode={dummyMode} onToggle={() => setDummyMode(m => !m)} />

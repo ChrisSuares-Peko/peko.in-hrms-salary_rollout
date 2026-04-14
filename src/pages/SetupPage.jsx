@@ -443,10 +443,10 @@ export default function SetupPage({ dummyMode, onNavigate }) {
 
                 <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
                   <button
-                    onClick={() => onNavigate("dashboard")}
+                    onClick={() => onNavigate(selected === "bank" ? "account-setup-bank" : "account-setup-virtual")}
                     style={{ ...btnPrimary, padding: "12px 28px", fontSize: FS.base }}
                   >
-                    Proceed to Dashboard →
+                    Proceed with Account Setup →
                   </button>
                   <button
                     onClick={() => setSelected(null)}
